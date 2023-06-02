@@ -1,0 +1,20 @@
+[project]
+name = "anubis_cli"
+description = "Fork of Anubis, the Python obfuscator, with a simple CLI"
+version = "1.0.0"
+authors = [
+    {name = "Martin Ahrnbom", email = "martin@nordicforestryautomation.com"}
+]
+dependencies = [
+    "pycryptodome",
+    "regex",
+    "requests"
+]
+readme = "README.md"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+anubis-cli = "anubis_cli.anubis:main"
