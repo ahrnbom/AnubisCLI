@@ -1,5 +1,5 @@
 # Made by 0sir1ss @ https://github.com/0sir1ss/Anubis
-import ast, io, tokenize, os, re, random, string, sys, argparse
+import ast, io, tokenize, os, re, random, string, sys, argparse, pathlib
 from regex import F
 
 def remove_docs(source):
@@ -174,32 +174,43 @@ def main():
         print("Too many (or unknown) parameters")
         sys.exit(1)
 
-    with open(file[0], "r", encoding='utf-8') as f:
-        src = f.read()
+    input_file = pathlib.Path(file[0])
+    if input_file.is_dir():
+        if not replace:
+            print("If output is a folder, you must use `--replace`")
+            sys.exit(1)
 
-    if junk:
-        src = anubis(src)
-        src = anubis(src)
-        
-    if carbonate:
-        src = carbon(src)
+        files = input_file.glob("**/*.py")
+    else:
+        files = [input_file]
 
-    start_contents = ""
-    if start:
-        with open(start, "r", encoding="utf-8") as f:
-            start_contents = f.read()
+    for file in files:
+        src = file.read_text()
 
-    src = start_contents + src
+        if junk:
+            src = anubis(src)
+            src = anubis(src)
+            
+        if carbonate:
+            src = carbon(src)
 
-    if not output:
-        if replace:
-            output = file[0]
+        start_contents = ""
+        if start:
+            start_file = pathlib.Path(start)
+            start_contents = start_file.read_text()
+
+        src = start_contents + src
+
+        if not output:
+            if replace:
+                output_file = file
+            else:
+                print(src)
+                sys.exit()   
         else:
-            print(src)
-            sys.exit()   
+            output_file = pathlib.Path(output)
 
-    with open(output, "w", encoding='utf-8') as f:
-        f.write(src)
+        output_file.write_text(src)
 
 
 if __name__=="__main__":

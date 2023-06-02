@@ -32,3 +32,9 @@ To start the output file with the contents of another file (like a copyright not
 ```bash
 anubis-cli --start some_notice.txt --replace some_file.py
 ```
+
+You can also use `--replace` on all .py files in a folder, like
+
+```bash
+anubis-cli --replace ./some_folder/
+```
