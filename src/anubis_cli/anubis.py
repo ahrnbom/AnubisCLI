@@ -1,6 +1,7 @@
 # Made by 0sir1ss @ https://github.com/0sir1ss/Anubis
 import ast, io, tokenize, os, re, random, string, sys, argparse, pathlib
 from regex import F
+from multiprocessing import Pool
 
 def remove_docs(source):
     io_obj = io.StringIO(source)
@@ -148,6 +149,39 @@ def anubis(code):
             newcode += f"    def {i}(self, {', '.join([''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase) for i in range(random.randint(5, 20))) for i in range(random.randint(1, 7))])}):\n        return self.{random.choice(funcs)}()\n"
     return newcode
 
+def process(file: pathlib.Path, options):
+    src = file.read_text()
+
+    junk = options.get("junk")
+    carbonate = options.get("carbonate")
+    start = options.get("start")
+    output = options.get("output")
+    replace = options.get("replace")
+
+    if junk:
+        src = anubis(src)
+        src = anubis(src)
+        
+    if carbonate:
+        src = carbon(src)
+
+    start_contents = ""
+    if start:
+        start_file = pathlib.Path(start)
+        start_contents = start_file.read_text()
+
+    src = start_contents + src
+
+    if not output:
+        if replace:
+            output_file = file
+        else:
+            print(src)
+            sys.exit()   
+    else:
+        output_file = pathlib.Path(output)
+
+    output_file.write_text(src)
 
 def main():
     arg_parser = argparse.ArgumentParser()
@@ -174,43 +208,26 @@ def main():
         print("Too many (or unknown) parameters")
         sys.exit(1)
 
+    options = {
+        "file": file,
+        "output": output,
+        "start": start,
+        "junk": junk,
+        "carbonate": carbonate,
+        "replace": replace
+    }
+
     input_file = pathlib.Path(file[0])
     if input_file.is_dir():
         if not replace:
             print("If output is a folder, you must use `--replace`")
             sys.exit(1)
 
-        files = input_file.glob("**/*.py")
+        pool = Pool()
+        pool.starmap(process, [(file, options) for file in input_file.glob("**/*.py")])
     else:
-        files = [input_file]
-
-    for file in files:
-        src = file.read_text()
-
-        if junk:
-            src = anubis(src)
-            src = anubis(src)
-            
-        if carbonate:
-            src = carbon(src)
-
-        start_contents = ""
-        if start:
-            start_file = pathlib.Path(start)
-            start_contents = start_file.read_text()
-
-        src = start_contents + src
-
-        if not output:
-            if replace:
-                output_file = file
-            else:
-                print(src)
-                sys.exit()   
-        else:
-            output_file = pathlib.Path(output)
-
-        output_file.write_text(src)
+        process(input_file, options)
+        
 
 
 if __name__=="__main__":
