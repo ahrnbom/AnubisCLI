@@ -177,11 +177,12 @@ def process(file: pathlib.Path, options):
             output_file = file
         else:
             print(src)
-            sys.exit()   
+            return
     else:
         output_file = pathlib.Path(output)
 
     output_file.write_text(src)
+    print(f"Written {output_file}")
 
 def main():
     arg_parser = argparse.ArgumentParser()
